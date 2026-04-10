@@ -1,0 +1,68 @@
+{
+  "quiz_id": "quiz-01",
+  "chapter_id": "chapter-01",
+  "title": "Chapter 1: Introduction to AI Agents and Digital FTEs",
+  "pass_threshold": 70,
+  "questions": [
+    {
+      "question_id": "q1",
+      "question": "What does FTE stand for in the context of AI Digital Workers?",
+      "options": {
+        "A": "Full Task Execution",
+        "B": "Full-Time Equivalent",
+        "C": "Functional Token Engine",
+        "D": "Fast Training Evaluator"
+      },
+      "correct_answer": "B",
+      "explanation": "FTE stands for Full-Time Equivalent — a standard HR unit representing one human working ~40 hours/week. A Digital FTE is an AI agent designed to match or exceed that output at 168 hours/week."
+    },
+    {
+      "question_id": "q2",
+      "question": "Which THREE components combine to create a Digital FTE?",
+      "options": {
+        "A": "LLMs + Tool Use + Agentic Loops",
+        "B": "LLMs + Databases + REST APIs",
+        "C": "Chatbots + RPA + Rule Engines",
+        "D": "Neural Networks + Cloud Storage + CI/CD"
+      },
+      "correct_answer": "A",
+      "explanation": "A Digital FTE combines: (1) Large Language Models for reasoning, (2) Tool Use to call APIs and databases, and (3) Agentic Loops that allow the agent to plan, act, observe, and adapt across multiple steps."
+    },
+    {
+      "question_id": "q3",
+      "question": "In the Agent Factory Architecture, which layer handles the HTTP interface?",
+      "options": {
+        "A": "L1 — Event Bus (Kafka)",
+        "B": "L4 — MCP Server",
+        "C": "L3 — FastAPI",
+        "D": "L7 — A2A Protocol"
+      },
+      "correct_answer": "C",
+      "explanation": "Layer 3 (FastAPI) is the HTTP interface layer in the 8-layer Agent Factory Architecture. It handles incoming requests and routes them to the appropriate backend logic."
+    },
+    {
+      "question_id": "q4",
+      "question": "What is the key architectural decision in Phase 1 (Zero-Backend-LLM)?",
+      "options": {
+        "A": "The backend calls Claude for every request",
+        "B": "All reasoning happens in the ChatGPT App; the backend is fully deterministic",
+        "C": "The database handles AI inference using pg_vector",
+        "D": "Cloudflare R2 runs a serverless LLM for content generation"
+      },
+      "correct_answer": "B",
+      "explanation": "In Zero-Backend-LLM architecture, the FastAPI backend is 100% deterministic — no LLM calls. All intelligent reasoning is handled by the ChatGPT App (the frontend LLM). This eliminates per-request LLM costs on the server."
+    },
+    {
+      "question_id": "q5",
+      "question": "How many hours per week does a Digital FTE work compared to a human FTE?",
+      "options": {
+        "A": "40 hours — same as a human",
+        "B": "80 hours — double shifts",
+        "C": "120 hours — no weekends",
+        "D": "168 hours — every hour of every day"
+      },
+      "correct_answer": "D",
+      "explanation": "A Digital FTE works 168 hours per week — every hour of every day (24 x 7 = 168). This continuous availability, combined with ~99% consistency and dramatically lower cost, is the core value proposition."
+    }
+  ]
+}

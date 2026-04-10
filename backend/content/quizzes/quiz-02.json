@@ -1,0 +1,68 @@
+{
+  "quiz_id": "quiz-02",
+  "chapter_id": "chapter-02",
+  "title": "Chapter 2: Claude Agent SDK Deep Dive",
+  "pass_threshold": 70,
+  "questions": [
+    {
+      "question_id": "q1",
+      "question": "What are the three core primitives of the Claude Agent SDK?",
+      "options": {
+        "A": "Model, Prompt, Response",
+        "B": "Agent, Tool, Runner",
+        "C": "Chain, Memory, OutputParser",
+        "D": "Pipeline, Step, Executor"
+      },
+      "correct_answer": "B",
+      "explanation": "The three core primitives of the Claude Agent SDK are: Agent (defines the agent), Tool (a callable function), and Runner (executes the agent loop). These three primitives are all you need to build a production agent."
+    },
+    {
+      "question_id": "q2",
+      "question": "What is the correct order of the Claude agent execution loop?",
+      "options": {
+        "A": "Receive -> Respond -> Log",
+        "B": "Plan -> Execute -> Return",
+        "C": "Receive -> Build context -> Send to Claude -> Process response -> (loop if tool call)",
+        "D": "Fetch -> Parse -> Transform -> Load"
+      },
+      "correct_answer": "C",
+      "explanation": "The agent loop is: (1) Receive user message, (2) Build context with system prompt + history + tool schemas, (3) Send to Claude API, (4) If Claude returns TOOL_USE — execute it and loop back; if TEXT — return the final response."
+    },
+    {
+      "question_id": "q3",
+      "question": "What type of data should a Tool handler return?",
+      "options": {
+        "A": "A formatted prose paragraph for Claude to display directly",
+        "B": "A JSON-serialisable dict — Claude will compose the prose",
+        "C": "Raw HTML for the frontend to render",
+        "D": "A Python object (Claude can introspect it)"
+      },
+      "correct_answer": "B",
+      "explanation": "Tools should return JSON-serialisable dicts (structured data). Claude receives this data and composes the prose response. If a tool returns pre-written prose, Claude loses the flexibility to tailor the response to context."
+    },
+    {
+      "question_id": "q4",
+      "question": "What is 'episodic memory' in an AI agent context?",
+      "options": {
+        "A": "The model's training data from past internet text",
+        "B": "The current conversation stored in the context window",
+        "C": "Summaries of past agent runs, retrieved to give continuity across sessions",
+        "D": "A Redis cache of API responses"
+      },
+      "correct_answer": "C",
+      "explanation": "Episodic memory stores summaries of past agent runs externally. At the start of a new run, relevant past episodes are retrieved and injected into the system prompt, allowing the agent to say 'Last time we discussed X...' across separate sessions."
+    },
+    {
+      "question_id": "q5",
+      "question": "Why should you always set a max_turns limit on an agent?",
+      "options": {
+        "A": "Because Claude cannot handle more than 20 tool calls by design",
+        "B": "To prevent runaway agent loops that could generate unexpected costs",
+        "C": "Because PostgreSQL connections time out after 20 queries",
+        "D": "Because Cloudflare R2 has a 20-read daily limit on free tier"
+      },
+      "correct_answer": "B",
+      "explanation": "Without a max_turns limit, a poorly-designed agent can loop indefinitely — making hundreds of LLM API calls and accumulating large unexpected costs before you notice. Always set max_turns=20 (or appropriate limit) as a safety measure."
+    }
+  ]
+}

@@ -1,0 +1,40 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(mkdir:*)",
+      "Bash(touch:*)",
+      "Bash([ -f \"D:\\\\Izma folder\\\\Governer sindh course\\\\Q4\\\\GEMINI_CLI\\\\HACKATHONS\\\\Course-Companion-FTE\\\\Course-Companion-FTE\\\\backend\\\\.env\" ])",
+      "Bash(pip install:*)",
+      "Bash(python -c \"import fastapi, uvicorn, pydantic, pydantic_settings, asyncpg, boto3; print\\('All packages OK'\\)\")",
+      "Bash(DATABASE_URL=\"postgresql://placeholder:placeholder@localhost/placeholder\" uvicorn app.main:app --host 127.0.0.1 --port 8765)",
+      "Bash(curl -s http://127.0.0.1:8765/health)",
+      "Bash(python -m json.tool)",
+      "Bash(curl -s -w \"\\\\nHTTP %{http_code}\" http://127.0.0.1:8765/api/v1/content/chapters)",
+      "Bash(curl -s -w \"\\\\nHTTP %{http_code}\" http://127.0.0.1:8765/api/v1/navigation/chapters/chapter-01/next)",
+      "Bash(curl -s -w \"\\\\nHTTP %{http_code}\" \"http://127.0.0.1:8765/api/v1/search?q=agent&user_id=test_user\")",
+      "Bash(curl -s http://127.0.0.1:8765/openapi.json)",
+      "Bash(python -c ':*)",
+      "Bash(kill %1)",
+      "Bash(DATABASE_URL=\"postgresql://placeholder:x@localhost/placeholder\" uvicorn app.main:app --host 127.0.0.1 --port 8765 --log-level warning)",
+      "Bash(curl -s -X POST http://127.0.0.1:8765/api/v1/access/users -H \"Content-Type: application/json\" -d \"{\\\\\"user_id\\\\\": \\\\\"test_user_001\\\\\"}\")",
+      "Bash(python -c \"import json,sys; spec=json.load\\(sys.stdin\\); [print\\(m.upper\\(\\), p\\) for p,ms in sorted\\(spec['paths'].items\\(\\)\\) for m in ms]\")",
+      "Bash(taskkill /F /IM python.exe /T)",
+      "Bash(taskkill /F /IM uvicorn.exe /T)",
+      "Bash(netstat -ano)",
+      "Bash(findstr \":8765\")",
+      "Bash(taskkill /F /PID 7364)",
+      "Bash(DATABASE_URL=\"postgresql://placeholder:x@localhost/placeholder\" uvicorn app.main:app --host 127.0.0.1 --port 8766 --log-level warning)",
+      "Bash(curl -s http://127.0.0.1:8766/openapi.json)",
+      "Bash(curl -s -X POST http://127.0.0.1:8766/api/v1/access/users -H \"Content-Type: application/json\" -d \"{\\\\\"user_id\\\\\": \\\\\"test_user_001\\\\\"}\")",
+      "Bash(curl -s http://127.0.0.1:8766/api/v1/quiz/quiz-01)",
+      "Bash(DATABASE_URL=\"postgresql://placeholder:x@localhost/placeholder\" uvicorn app.main:app --host 127.0.0.1 --port 8767 --log-level warning)",
+      "Bash(curl -s http://127.0.0.1:8767/health)",
+      "Bash(curl -s http://127.0.0.1:8767/api/v1/quiz/quiz-01)",
+      "Bash(curl -s -X POST http://127.0.0.1:8767/api/v1/quiz/quiz-01/submit -H \"Content-Type: application/json\" -d \"{\\\\\"user_id\\\\\":\\\\\"test_user_001\\\\\",\\\\\"answers\\\\\":[{\\\\\"question_id\\\\\":\\\\\"q1\\\\\",\\\\\"answer\\\\\":\\\\\"B\\\\\"},{\\\\\"question_id\\\\\":\\\\\"q2\\\\\",\\\\\"answer\\\\\":\\\\\"A\\\\\"},{\\\\\"question_id\\\\\":\\\\\"q3\\\\\",\\\\\"answer\\\\\":\\\\\"C\\\\\"},{\\\\\"question_id\\\\\":\\\\\"q4\\\\\",\\\\\"answer\\\\\":\\\\\"B\\\\\"},{\\\\\"question_id\\\\\":\\\\\"q5\\\\\",\\\\\"answer\\\\\":\\\\\"D\\\\\"}]}\")",
+      "Bash(curl -s -X POST http://127.0.0.1:8767/api/v1/quiz/quiz-01/submit -H \"Content-Type: application/json\" -d \"{\\\\\"user_id\\\\\":\\\\\"test_user_001\\\\\",\\\\\"answers\\\\\":[{\\\\\"question_id\\\\\":\\\\\"q1\\\\\",\\\\\"answer\\\\\":\\\\\"A\\\\\"},{\\\\\"question_id\\\\\":\\\\\"q2\\\\\",\\\\\"answer\\\\\":\\\\\"A\\\\\"},{\\\\\"question_id\\\\\":\\\\\"q3\\\\\",\\\\\"answer\\\\\":\\\\\"A\\\\\"},{\\\\\"question_id\\\\\":\\\\\"q4\\\\\",\\\\\"answer\\\\\":\\\\\"B\\\\\"},{\\\\\"question_id\\\\\":\\\\\"q5\\\\\",\\\\\"answer\\\\\":\\\\\"D\\\\\"}]}\")",
+      "Bash(DATABASE_URL=\"postgresql://x:x@localhost/x\" uvicorn app.main:app --host 127.0.0.1 --port 8768 --log-level warning)",
+      "Bash(curl -s http://127.0.0.1:8768/health)",
+      "Bash(kill %%)"
+    ]
+  }
+}

@@ -1,0 +1,1020 @@
+openapi: "3.1.0"
+info:
+  title: Course Companion FTE API
+  description: >
+    Zero-Backend-LLM API for the AI Agent Development course by Panaversity.
+    All intelligent reasoning is handled by the ChatGPT App (frontend LLM).
+    This backend is 100% deterministic — no LLM calls.
+  version: "1.0"
+
+servers:
+  - url: https://your-backend.railway.app
+    description: Production server (update after Railway deployment)
+
+# ─────────────────────────────────────────────────────────────────────────────
+# PATHS
+# ─────────────────────────────────────────────────────────────────────────────
+paths:
+
+  # ── Health ──────────────────────────────────────────────────────────────────
+  /health:
+    get:
+      operationId: get_health
+      summary: Health check
+      description: >
+        Returns server status, version, phase, and backend_llm flag.
+        backend_llm: false proves Zero-Backend-LLM compliance.
+      responses:
+        "200":
+          description: Server is healthy
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthResponse"
+
+  # ── 6.1 Content APIs ────────────────────────────────────────────────────────
+  /api/v1/content/chapters:
+    get:
+      operationId: get_chapters
+      summary: List all chapters
+      description: >
+        Returns metadata for all chapters (title, id, tier_required,
+        estimated_minutes, order_index, tags). No authentication required.
+        Does NOT return chapter content — use get_chapter_content for that.
+      responses:
+        "200":
+          description: List of all chapter metadata
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ChapterList"
+
+  /api/v1/content/chapters/{chapter_id}:
+    get:
+      operationId: get_chapter_content
+      summary: Get full chapter content
+      description: >
+        Returns the full markdown content of a chapter.
+        Checks freemium access gate first. If the user does not have the
+        required tier, returns 403. After serving, automatically updates
+        the user's last_read progress.
+      parameters:
+        - name: chapter_id
+          in: path
+          required: true
+          description: Chapter identifier (e.g. chapter-01)
+          schema:
+            type: string
+            example: chapter-01
+        - name: X-User-ID
+          in: header
+          required: false
+          description: The user's unique identifier for access control and progress tracking
+          schema:
+            type: string
+            example: chatgpt_user_abc123
+      responses:
+        "200":
+          description: Full chapter markdown content
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ChapterContent"
+        "403":
+          description: User does not have the required tier to access this chapter
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AccessDeniedError"
+        "404":
+          description: Chapter not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorDetail"
+        "503":
+          description: Content not available (R2 not yet seeded)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorDetail"
+
+  /api/v1/content/chapters/{chapter_id}/summary:
+    get:
+      operationId: get_chapter_summary
+      summary: Get chapter preview (first 200 words)
+      description: >
+        Returns the first 200 words of a chapter as a preview.
+        Available to all tiers — use this to show locked chapter previews
+        when the user does not have premium access.
+      parameters:
+        - name: chapter_id
+          in: path
+          required: true
+          description: Chapter identifier (e.g. chapter-04)
+          schema:
+            type: string
+            example: chapter-04
+      responses:
+        "200":
+          description: Chapter preview (first 200 words)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ChapterSummary"
+        "404":
+          description: Chapter not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorDetail"
+
+  # ── 6.2 Navigation APIs ──────────────────────────────────────────────────────
+  /api/v1/navigation/chapters/{chapter_id}/next:
+    get:
+      operationId: get_next_chapter
+      summary: Get next chapter metadata
+      description: >
+        Returns metadata for the chapter that follows chapter_id
+        in the course sequence (based on order_index). Does not return
+        full content — use get_chapter_content for that.
+      parameters:
+        - name: chapter_id
+          in: path
+          required: true
+          description: Current chapter identifier
+          schema:
+            type: string
+            example: chapter-01
+      responses:
+        "200":
+          description: Metadata for the next chapter
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ChapterNavItem"
+        "404":
+          description: No next chapter (this is the last chapter)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorDetail"
+
+  /api/v1/navigation/chapters/{chapter_id}/prev:
+    get:
+      operationId: get_prev_chapter
+      summary: Get previous chapter metadata
+      description: >
+        Returns metadata for the chapter that precedes chapter_id
+        in the course sequence. Returns 404 if this is the first chapter.
+      parameters:
+        - name: chapter_id
+          in: path
+          required: true
+          description: Current chapter identifier
+          schema:
+            type: string
+            example: chapter-03
+      responses:
+        "200":
+          description: Metadata for the previous chapter
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ChapterNavItem"
+        "404":
+          description: No previous chapter (this is the first chapter)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorDetail"
+
+  /api/v1/navigation/chapters/sequence:
+    get:
+      operationId: get_navigation_sequence
+      summary: Get full ordered chapter sequence
+      description: >
+        Returns the complete ordered list of chapters with id, title,
+        tier_required, and order_index. Use this to build a table of contents
+        or to determine the full course structure.
+      responses:
+        "200":
+          description: Full ordered chapter sequence
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SequenceResponse"
+
+  # ── 6.3 Quiz APIs ────────────────────────────────────────────────────────────
+  /api/v1/quiz/chapter/{chapter_id}:
+    get:
+      operationId: get_quiz_id_for_chapter
+      summary: Get quiz ID for a chapter
+      description: >
+        Returns the quiz_id that corresponds to a given chapter_id.
+        Use this to find which quiz to load after a student finishes a chapter.
+      parameters:
+        - name: chapter_id
+          in: path
+          required: true
+          description: Chapter identifier
+          schema:
+            type: string
+            example: chapter-01
+      responses:
+        "200":
+          description: Quiz ID for the chapter
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/QuizIdResponse"
+        "404":
+          description: No quiz found for this chapter
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorDetail"
+
+  /api/v1/quiz/{quiz_id}:
+    get:
+      operationId: get_quiz
+      summary: Get quiz questions (without answer keys)
+      description: >
+        Returns quiz questions with multiple-choice options A/B/C/D.
+        IMPORTANT: Correct answers are NOT included in this response.
+        Never guess or reveal answers — always submit to submit_quiz for grading.
+      parameters:
+        - name: quiz_id
+          in: path
+          required: true
+          description: Quiz identifier (e.g. quiz-01)
+          schema:
+            type: string
+            example: quiz-01
+      responses:
+        "200":
+          description: Quiz questions without answer keys
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/QuizOut"
+        "404":
+          description: Quiz not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorDetail"
+
+  /api/v1/quiz/{quiz_id}/submit:
+    post:
+      operationId: submit_quiz
+      summary: Submit quiz answers for grading
+      description: >
+        Submits student answers for deterministic rule-based grading.
+        ZERO LLM calls — grading is pure string comparison against the answer key.
+        Returns score (0-100), pass/fail, and per-question feedback with explanations
+        for incorrect answers. Stores attempt in quiz_attempts table.
+      parameters:
+        - name: quiz_id
+          in: path
+          required: true
+          description: Quiz identifier
+          schema:
+            type: string
+            example: quiz-01
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/QuizSubmission"
+      responses:
+        "200":
+          description: Grading result with score, pass/fail, and per-question feedback
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/QuizResult"
+        "404":
+          description: Quiz not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorDetail"
+
+  # ── 6.4 Progress APIs ────────────────────────────────────────────────────────
+  /api/v1/progress/{user_id}:
+    get:
+      operationId: get_progress
+      summary: Get full user progress summary
+      description: >
+        Returns complete progress data for a user: completed chapters,
+        overall completion percentage, current streak, longest streak,
+        total study days, and best quiz score per quiz.
+      parameters:
+        - name: user_id
+          in: path
+          required: true
+          description: User identifier
+          schema:
+            type: string
+            example: chatgpt_user_abc123
+      responses:
+        "200":
+          description: Full progress summary
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserProgress"
+
+  /api/v1/progress/{user_id}/chapter/{chapter_id}:
+    put:
+      operationId: update_progress
+      summary: Update chapter progress
+      description: >
+        Updates a user's progress for a specific chapter. Automatically
+        recalculates the study streak. Call this when a student marks a
+        chapter as complete or reaches a milestone completion percentage.
+      parameters:
+        - name: user_id
+          in: path
+          required: true
+          description: User identifier
+          schema:
+            type: string
+            example: chatgpt_user_abc123
+        - name: chapter_id
+          in: path
+          required: true
+          description: Chapter identifier
+          schema:
+            type: string
+            example: chapter-01
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProgressUpdate"
+      responses:
+        "200":
+          description: Updated chapter progress row
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ChapterProgressOut"
+
+  /api/v1/progress/{user_id}/streak:
+    get:
+      operationId: get_streak
+      summary: Get user streak information
+      description: >
+        Returns streak-only data: current streak, longest streak,
+        last activity date, and total study days. Faster than
+        get_progress when only streak data is needed.
+      parameters:
+        - name: user_id
+          in: path
+          required: true
+          description: User identifier
+          schema:
+            type: string
+            example: chatgpt_user_abc123
+      responses:
+        "200":
+          description: Streak information
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StreakInfo"
+
+  # ── 6.5 Search API ───────────────────────────────────────────────────────────
+  /api/v1/search:
+    get:
+      operationId: search_content
+      summary: Search course content
+      description: >
+        Keyword search across chapter titles, descriptions, tags, and full
+        chapter text. Only returns chapters the requesting user has access to
+        based on their tier. Each result includes a 150-character excerpt
+        showing where the match was found.
+      parameters:
+        - name: q
+          in: query
+          required: true
+          description: Search keyword or phrase (e.g. "MCP protocol")
+          schema:
+            type: string
+            minLength: 1
+            example: MCP protocol
+        - name: user_id
+          in: query
+          required: false
+          description: User identifier for access-filtered results
+          schema:
+            type: string
+            example: chatgpt_user_abc123
+      responses:
+        "200":
+          description: List of matching chapter sections with excerpts
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SearchResponse"
+
+  # ── 6.6 Access Control APIs ──────────────────────────────────────────────────
+  /api/v1/access/check/{user_id}/{chapter_id}:
+    get:
+      operationId: check_access
+      summary: Check chapter access for a user
+      description: >
+        Returns whether a user has access to a specific chapter based on
+        their subscription tier. Logic: free chapters are always accessible;
+        premium chapters require premium or higher tier; pro requires pro tier.
+        Returns 'free' tier if the user is not yet registered.
+      parameters:
+        - name: user_id
+          in: path
+          required: true
+          description: User identifier
+          schema:
+            type: string
+            example: chatgpt_user_abc123
+        - name: chapter_id
+          in: path
+          required: true
+          description: Chapter identifier
+          schema:
+            type: string
+            example: chapter-04
+      responses:
+        "200":
+          description: Access check result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AccessCheckResponse"
+        "404":
+          description: Chapter not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorDetail"
+
+  /api/v1/access/users:
+    post:
+      operationId: create_or_get_user
+      summary: Create or get user
+      description: >
+        Creates a new user or returns the existing user (upsert by user_id).
+        Call this on first interaction to register the ChatGPT user in the system.
+        Returns the user object including their current tier.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateUserRequest"
+      responses:
+        "200":
+          description: User object (created or existing)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserOut"
+
+  /api/v1/access/users/{user_id}/tier:
+    get:
+      operationId: get_user_tier
+      summary: Get user subscription tier
+      description: >
+        Returns the subscription tier for a user_id.
+        Returns 'free' if the user is not registered in the system.
+        Possible values: free | premium | pro | team
+      parameters:
+        - name: user_id
+          in: path
+          required: true
+          description: User identifier
+          schema:
+            type: string
+            example: chatgpt_user_abc123
+      responses:
+        "200":
+          description: User tier
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TierResponse"
+
+# ─────────────────────────────────────────────────────────────────────────────
+# COMPONENTS / SCHEMAS
+# ─────────────────────────────────────────────────────────────────────────────
+components:
+  schemas:
+
+    # ── Health ────────────────────────────────────────────────────────────────
+    HealthResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          example: ok
+        version:
+          type: string
+          example: "1.0"
+        phase:
+          type: string
+          example: "1"
+        backend_llm:
+          type: boolean
+          example: false
+      required: [status, version, phase, backend_llm]
+
+    # ── Content ───────────────────────────────────────────────────────────────
+    ChapterMetadata:
+      type: object
+      properties:
+        chapter_id:
+          type: string
+          example: chapter-01
+        title:
+          type: string
+          example: Introduction to AI Agents and Digital FTEs
+        description:
+          type: string
+          nullable: true
+        tier_required:
+          type: string
+          enum: [free, premium, pro]
+          example: free
+        order_index:
+          type: integer
+          example: 1
+        estimated_minutes:
+          type: integer
+          nullable: true
+          example: 15
+        word_count:
+          type: integer
+          nullable: true
+          example: 950
+        tags:
+          type: array
+          items:
+            type: string
+          example: ["agents", "fte", "introduction"]
+      required: [chapter_id, title, tier_required, order_index]
+
+    ChapterList:
+      type: object
+      properties:
+        chapters:
+          type: array
+          items:
+            $ref: "#/components/schemas/ChapterMetadata"
+      required: [chapters]
+
+    ChapterContent:
+      type: object
+      properties:
+        chapter_id:
+          type: string
+          example: chapter-01
+        title:
+          type: string
+        tier_required:
+          type: string
+          enum: [free, premium, pro]
+        order_index:
+          type: integer
+        estimated_minutes:
+          type: integer
+          nullable: true
+        content:
+          type: string
+          description: Full markdown text of the chapter
+      required: [chapter_id, title, tier_required, order_index, content]
+
+    ChapterSummary:
+      type: object
+      properties:
+        chapter_id:
+          type: string
+        title:
+          type: string
+        tier_required:
+          type: string
+          enum: [free, premium, pro]
+        preview:
+          type: string
+          description: First 200 words of the chapter
+      required: [chapter_id, title, tier_required, preview]
+
+    # ── Navigation ────────────────────────────────────────────────────────────
+    ChapterNavItem:
+      type: object
+      properties:
+        chapter_id:
+          type: string
+          example: chapter-02
+        title:
+          type: string
+          example: Claude Agent SDK Deep Dive
+        tier_required:
+          type: string
+          enum: [free, premium, pro]
+        order_index:
+          type: integer
+          example: 2
+      required: [chapter_id, title, tier_required, order_index]
+
+    SequenceResponse:
+      type: object
+      properties:
+        chapters:
+          type: array
+          items:
+            $ref: "#/components/schemas/ChapterNavItem"
+      required: [chapters]
+
+    # ── Quiz ──────────────────────────────────────────────────────────────────
+    QuizIdResponse:
+      type: object
+      properties:
+        chapter_id:
+          type: string
+          example: chapter-01
+        quiz_id:
+          type: string
+          example: quiz-01
+      required: [chapter_id, quiz_id]
+
+    QuizQuestion:
+      type: object
+      properties:
+        question_id:
+          type: string
+          example: q1
+        question:
+          type: string
+          example: What does FTE stand for?
+        options:
+          type: object
+          additionalProperties:
+            type: string
+          example:
+            A: Full Task Execution
+            B: Full-Time Equivalent
+            C: Functional Token Engine
+            D: Fast Training Evaluator
+        type:
+          type: string
+          example: mcq
+      required: [question_id, question, options, type]
+
+    QuizOut:
+      type: object
+      description: Quiz with questions but WITHOUT correct answers
+      properties:
+        quiz_id:
+          type: string
+          example: quiz-01
+        chapter_id:
+          type: string
+          example: chapter-01
+        title:
+          type: string
+          example: "Chapter 1: Introduction to AI Agents and Digital FTEs"
+        pass_threshold:
+          type: integer
+          example: 70
+        questions:
+          type: array
+          items:
+            $ref: "#/components/schemas/QuizQuestion"
+      required: [quiz_id, chapter_id, title, pass_threshold, questions]
+
+    AnswerItem:
+      type: object
+      properties:
+        question_id:
+          type: string
+          example: q1
+        answer:
+          type: string
+          enum: [A, B, C, D]
+          example: B
+      required: [question_id, answer]
+
+    QuizSubmission:
+      type: object
+      properties:
+        user_id:
+          type: string
+          example: chatgpt_user_abc123
+        answers:
+          type: array
+          items:
+            $ref: "#/components/schemas/AnswerItem"
+          minItems: 1
+      required: [user_id, answers]
+
+    QuestionFeedback:
+      type: object
+      properties:
+        question_id:
+          type: string
+          example: q1
+        correct:
+          type: boolean
+          example: true
+        correct_answer:
+          type: string
+          example: B
+        explanation:
+          type: string
+          nullable: true
+          description: Explanation shown only for incorrect answers
+      required: [question_id, correct, correct_answer]
+
+    QuizResult:
+      type: object
+      properties:
+        quiz_id:
+          type: string
+          example: quiz-01
+        user_id:
+          type: string
+          example: chatgpt_user_abc123
+        score:
+          type: integer
+          minimum: 0
+          maximum: 100
+          example: 80
+        total:
+          type: integer
+          example: 5
+        correct:
+          type: integer
+          example: 4
+        passed:
+          type: boolean
+          example: true
+        feedback:
+          type: array
+          items:
+            $ref: "#/components/schemas/QuestionFeedback"
+      required: [quiz_id, user_id, score, total, correct, passed, feedback]
+
+    # ── Progress ──────────────────────────────────────────────────────────────
+    QuizScore:
+      type: object
+      properties:
+        quiz_id:
+          type: string
+          example: quiz-01
+        score:
+          type: integer
+          example: 80
+        passed:
+          type: boolean
+          example: true
+        attempted_at:
+          type: string
+          format: date-time
+          nullable: true
+      required: [quiz_id, score, passed]
+
+    UserProgress:
+      type: object
+      properties:
+        user_id:
+          type: string
+          example: chatgpt_user_abc123
+        completed_chapters:
+          type: array
+          items:
+            type: string
+          example: ["chapter-01", "chapter-02"]
+        completion_percentage:
+          type: integer
+          minimum: 0
+          maximum: 100
+          example: 33
+        current_streak:
+          type: integer
+          example: 5
+        longest_streak:
+          type: integer
+          example: 7
+        total_study_days:
+          type: integer
+          example: 12
+        quiz_scores:
+          type: array
+          items:
+            $ref: "#/components/schemas/QuizScore"
+      required:
+        - user_id
+        - completed_chapters
+        - completion_percentage
+        - current_streak
+        - longest_streak
+        - total_study_days
+        - quiz_scores
+
+    ProgressUpdate:
+      type: object
+      properties:
+        completed:
+          type: boolean
+          example: true
+        completion_percentage:
+          type: integer
+          minimum: 0
+          maximum: 100
+          example: 100
+      required: [completed, completion_percentage]
+
+    ChapterProgressOut:
+      type: object
+      properties:
+        user_id:
+          type: string
+        chapter_id:
+          type: string
+        completed:
+          type: boolean
+        completion_percentage:
+          type: integer
+        last_read_at:
+          type: string
+          format: date-time
+          nullable: true
+        updated_at:
+          type: string
+          format: date-time
+          nullable: true
+      required: [user_id, chapter_id, completed, completion_percentage]
+
+    StreakInfo:
+      type: object
+      properties:
+        user_id:
+          type: string
+          example: chatgpt_user_abc123
+        current_streak:
+          type: integer
+          example: 5
+        longest_streak:
+          type: integer
+          example: 7
+        last_activity_date:
+          type: string
+          format: date
+          nullable: true
+          example: "2026-04-11"
+        total_study_days:
+          type: integer
+          example: 12
+      required: [user_id, current_streak, longest_streak, total_study_days]
+
+    # ── Search ────────────────────────────────────────────────────────────────
+    SearchResult:
+      type: object
+      properties:
+        chapter_id:
+          type: string
+          example: chapter-03
+        title:
+          type: string
+          example: MCP and Agent Skills
+        tier_required:
+          type: string
+          enum: [free, premium, pro]
+        order_index:
+          type: integer
+          example: 3
+        excerpt:
+          type: string
+          description: 150-character excerpt around the match location
+          example: "...MCP stands for Model Context Protocol — it provides tools and domain knowledge to agents..."
+      required: [chapter_id, title, tier_required, order_index, excerpt]
+
+    SearchResponse:
+      type: object
+      properties:
+        query:
+          type: string
+          example: MCP protocol
+        user_id:
+          type: string
+          example: chatgpt_user_abc123
+        total:
+          type: integer
+          example: 2
+        results:
+          type: array
+          items:
+            $ref: "#/components/schemas/SearchResult"
+      required: [query, user_id, total, results]
+
+    # ── Access ────────────────────────────────────────────────────────────────
+    AccessCheckResponse:
+      type: object
+      properties:
+        has_access:
+          type: boolean
+          example: true
+        tier_required:
+          type: string
+          enum: [free, premium, pro]
+          example: free
+        user_tier:
+          type: string
+          enum: [free, premium, pro, team]
+          example: free
+        chapter_id:
+          type: string
+          example: chapter-01
+        user_id:
+          type: string
+          example: chatgpt_user_abc123
+      required: [has_access, tier_required, user_tier, chapter_id, user_id]
+
+    CreateUserRequest:
+      type: object
+      properties:
+        user_id:
+          type: string
+          example: chatgpt_user_abc123
+        email:
+          type: string
+          format: email
+          nullable: true
+          example: student@example.com
+      required: [user_id]
+
+    UserOut:
+      type: object
+      properties:
+        user_id:
+          type: string
+          example: chatgpt_user_abc123
+        email:
+          type: string
+          nullable: true
+        tier:
+          type: string
+          enum: [free, premium, pro, team]
+          example: free
+        created_at:
+          type: string
+          nullable: true
+          example: "2026-04-11T10:00:00"
+      required: [user_id, tier]
+
+    TierResponse:
+      type: object
+      properties:
+        user_id:
+          type: string
+          example: chatgpt_user_abc123
+        tier:
+          type: string
+          enum: [free, premium, pro, team]
+          example: free
+      required: [user_id, tier]
+
+    # ── Errors ────────────────────────────────────────────────────────────────
+    ErrorDetail:
+      type: object
+      properties:
+        detail:
+          type: string
+          example: Chapter 'chapter-99' not found
+      required: [detail]
+
+    AccessDeniedError:
+      type: object
+      properties:
+        detail:
+          type: object
+          properties:
+            error:
+              type: string
+              example: premium_required
+            upgrade_message:
+              type: string
+              example: This chapter requires Premium tier. Your current tier is free.
+            tier_required:
+              type: string
+              enum: [free, premium, pro]
+              example: premium
+            user_tier:
+              type: string
+              enum: [free, premium, pro, team]
+              example: free
+          required: [error, upgrade_message, tier_required, user_tier]
+      required: [detail]

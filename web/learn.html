@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Learn — Course Companion FTE</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <script>
+    tailwind.config = {
+      theme: { extend: { colors: { brand: { DEFAULT: '#06b6d4', dark: '#0e7490', light: '#67e8f9' } } } }
+    }
+  </script>
+  <style>
+    #chapter-content h1{font-size:1.5rem;font-weight:800;margin:2rem 0 1rem;color:#f9fafb}
+    #chapter-content h2{font-size:1.25rem;font-weight:700;margin:1.75rem 0 .75rem;color:#e5e7eb;border-bottom:1px solid #1f2937;padding-bottom:.5rem}
+    #chapter-content h3{font-size:1.1rem;font-weight:600;margin:1.5rem 0 .5rem;color:#d1d5db}
+    #chapter-content p{color:#9ca3af;line-height:1.8;margin-bottom:1rem}
+    #chapter-content ul,#chapter-content ol{color:#9ca3af;padding-left:1.5rem;margin-bottom:1rem;line-height:1.8}
+    #chapter-content li{margin-bottom:.25rem}
+    #chapter-content code{background:#111827;color:#06b6d4;padding:.125rem .375rem;border-radius:.25rem;font-size:.85em;font-family:monospace}
+    #chapter-content pre{background:#111827;border:1px solid #1f2937;border-radius:.75rem;padding:1rem;overflow-x:auto;margin-bottom:1rem}
+    #chapter-content pre code{background:none;color:#d1d5db;padding:0}
+    #chapter-content blockquote{border-left:4px solid #06b6d4;padding:.5rem 1rem;background:rgba(6,182,212,.05);border-radius:0 .5rem .5rem 0;margin-bottom:1rem;color:#6b7280;font-style:italic}
+    #chapter-content table{width:100%;border-collapse:collapse;margin-bottom:1.5rem;font-size:.875rem}
+    #chapter-content th{text-align:left;padding:.5rem .75rem;background:#1f2937;color:#d1d5db;font-weight:600;border:1px solid #374151}
+    #chapter-content td{padding:.5rem .75rem;color:#9ca3af;border:1px solid #1f2937}
+    #chapter-content strong{color:#f9fafb;font-weight:700}
+    #chapter-content a{color:#06b6d4}
+    #chapter-content hr{border-color:#1f2937;margin:1.5rem 0}
+  </style>
+</head>
+<body class="bg-gray-950 text-gray-100 font-sans antialiased min-h-screen">
+
+  <!-- NAV -->
+  <nav class="fixed top-0 inset-x-0 z-50 bg-gray-950/80 backdrop-blur border-b border-gray-800">
+    <div class="max-w-4xl mx-auto px-4 h-16 flex items-center justify-between">
+      <a href="dashboard.html" class="text-brand font-bold text-lg">&larr; Dashboard</a>
+      <div class="flex items-center gap-3">
+        <span id="nav-estimated" class="hidden sm:inline text-xs text-gray-500"></span>
+        <button id="btn-complete"
+          class="px-4 py-1.5 rounded-full bg-brand/10 text-brand border border-brand/30 text-sm font-semibold hover:bg-brand hover:text-gray-950 transition-colors">
+          Mark Complete
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <div class="pt-20 max-w-4xl mx-auto px-4 pb-16">
+
+    <!-- CHAPTER HEADER -->
+    <div class="py-8 border-b border-gray-800 mb-8">
+      <div class="flex items-center gap-2 mb-3 flex-wrap">
+        <span id="chapter-tier-badge" class="text-xs px-2 py-0.5 rounded-full bg-brand/10 text-brand uppercase font-semibold">free</span>
+        <span id="chapter-order" class="text-xs text-gray-600">Chapter —</span>
+      </div>
+      <h1 id="chapter-title" class="text-2xl sm:text-3xl font-extrabold mb-3">Loading chapter&hellip;</h1>
+      <p id="chapter-meta" class="text-sm text-gray-500"></p>
+    </div>
+
+    <!-- LOCKED WARNING -->
+    <div id="locked-warning" class="hidden mb-8 p-5 rounded-2xl bg-yellow-900/20 border border-yellow-800">
+      <h3 class="font-bold text-yellow-400 mb-2">Premium Chapter</h3>
+      <p id="locked-message" class="text-yellow-300 text-sm mb-4"></p>
+      <a href="index.html#pricing"
+         class="inline-block px-4 py-2 rounded-xl bg-brand text-gray-950 font-bold text-sm hover:bg-brand-light transition-colors">
+        Upgrade to Unlock
+      </a>
+    </div>
+
+    <!-- CHAPTER CONTENT -->
+    <article id="chapter-content" class="mb-12">
+      <div id="content-skeleton" class="space-y-4 animate-pulse">
+        <div class="h-6 bg-gray-800 rounded w-3/4"></div>
+        <div class="h-4 bg-gray-800 rounded w-full"></div>
+        <div class="h-4 bg-gray-800 rounded w-5/6"></div>
+        <div class="h-4 bg-gray-800 rounded w-full"></div>
+        <div class="h-4 bg-gray-800 rounded w-4/5"></div>
+        <div class="h-6 bg-gray-800 rounded w-1/2 mt-8"></div>
+        <div class="h-4 bg-gray-800 rounded w-full"></div>
+        <div class="h-4 bg-gray-800 rounded w-full"></div>
+      </div>
+    </article>
+
+    <!-- ACTIONS (shown after content loads) -->
+    <div id="chapter-actions" class="hidden">
+
+      <!-- Quiz CTA -->
+      <div class="mb-6 p-5 rounded-2xl bg-brand/5 border border-brand/20">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <h3 class="font-bold text-brand mb-1">Ready to test your knowledge?</h3>
+            <p class="text-sm text-gray-400">Take the chapter quiz — graded deterministically by the backend.</p>
+          </div>
+          <a id="quiz-btn" href="#"
+             class="flex-shrink-0 px-5 py-2.5 rounded-xl bg-brand text-gray-950 font-bold text-sm hover:bg-brand-light transition-colors text-center">
+            Take Quiz &rarr;
+          </a>
+        </div>
+      </div>
+
+      <!-- Prev / Next -->
+      <div class="flex items-center justify-between gap-4">
+        <a id="prev-btn" href="#"
+           class="px-5 py-3 rounded-xl border border-gray-800 text-gray-500 font-semibold text-sm pointer-events-none opacity-40">
+          &larr; Previous
+        </a>
+        <button id="btn-complete-bottom"
+          class="px-5 py-3 rounded-xl bg-brand/10 border border-brand/30 text-brand text-sm font-semibold hover:bg-brand hover:text-gray-950 transition-colors">
+          Mark Complete &#10003;
+        </button>
+        <a id="next-btn" href="#"
+           class="px-5 py-3 rounded-xl border border-gray-800 text-gray-500 font-semibold text-sm pointer-events-none opacity-40">
+          Next &rarr;
+        </a>
+      </div>
+    </div>
+
+    <!-- ERROR -->
+    <div id="error-msg" class="hidden p-5 rounded-2xl bg-red-900/20 border border-red-800 text-red-300 text-sm"></div>
+
+  </div>
+
+  <script>
+    const API = 'http://localhost:8000/api/v1';
+    const USER_ID = localStorage.getItem('cc_user_id') || 'web_anonymous';
+    const params = new URLSearchParams(window.location.search);
+    const CHAPTER_ID = params.get('chapter') || 'chapter-01';
+
+    function showError(msg) {
+      const el = document.getElementById('error-msg');
+      el.textContent = 'Error: ' + msg + ' — Start the backend on localhost:8000.';
+      el.classList.remove('hidden');
+      const sk = document.getElementById('content-skeleton');
+      if (sk) sk.remove();
+    }
+
+    function stripFrontmatter(md) {
+      const lines = md.split('\n');
+      if (lines[0] && lines[0].trim() === '---') {
+        const end = lines.indexOf('---', 1);
+        if (end !== -1) return lines.slice(end + 1).join('\n');
+      }
+      return md;
+    }
+
+    async function loadChapter() {
+      try {
+        // 1. Fetch all chapter metadata for nav + header
+        const chapRes = await fetch(`${API}/content/chapters`);
+        if (!chapRes.ok) throw new Error('Backend not reachable (HTTP ' + chapRes.status + ')');
+        const { chapters } = await chapRes.json();
+        const meta = chapters.find(c => c.chapter_id === CHAPTER_ID);
+
+        if (meta) {
+          document.title = meta.title + ' — Course Companion FTE';
+          document.getElementById('chapter-title').textContent = meta.title;
+          document.getElementById('chapter-order').textContent = 'Chapter ' + meta.order_index;
+          document.getElementById('chapter-tier-badge').textContent = meta.tier_required;
+          document.getElementById('nav-estimated').textContent = '~' + (meta.estimated_minutes || '?') + ' min';
+          document.getElementById('chapter-meta').textContent =
+            (meta.estimated_minutes || '?') + ' min read  ·  ' + (meta.tags || []).slice(0, 4).join(', ');
+        }
+
+        // 2. Fetch full content
+        const contentRes = await fetch(`${API}/content/chapters/${CHAPTER_ID}`, {
+          headers: { 'X-User-ID': USER_ID }
+        });
+
+        const sk = document.getElementById('content-skeleton');
+        if (sk) sk.remove();
+
+        if (contentRes.status === 403) {
+          const err = await contentRes.json();
+          document.getElementById('locked-warning').classList.remove('hidden');
+          document.getElementById('locked-message').textContent =
+            (err.detail && err.detail.upgrade_message) || 'This chapter requires a higher tier.';
+        } else if (contentRes.ok) {
+          const data = await contentRes.json();
+          const clean = stripFrontmatter(data.content || '');
+          document.getElementById('chapter-content').innerHTML = marked.parse(clean);
+        } else {
+          throw new Error('Chapter load failed with status ' + contentRes.status);
+        }
+
+        // 3. Navigation
+        const sorted = [...chapters].sort((a, b) => a.order_index - b.order_index);
+        const idx = sorted.findIndex(c => c.chapter_id === CHAPTER_ID);
+
+        if (idx > 0) {
+          const prev = sorted[idx - 1];
+          const prevBtn = document.getElementById('prev-btn');
+          prevBtn.href = 'learn.html?chapter=' + prev.chapter_id;
+          prevBtn.textContent = '\u2190 ' + (prev.title.split(':')[0] || 'Previous');
+          prevBtn.classList.remove('pointer-events-none', 'opacity-40');
+          prevBtn.classList.add('text-gray-300', 'hover:text-brand', 'hover:border-brand');
+        }
+
+        if (idx < sorted.length - 1) {
+          const next = sorted[idx + 1];
+          const nextBtn = document.getElementById('next-btn');
+          nextBtn.href = 'learn.html?chapter=' + next.chapter_id;
+          nextBtn.textContent = (next.title.split(':')[0] || 'Next') + ' \u2192';
+          nextBtn.classList.remove('pointer-events-none', 'opacity-40');
+          nextBtn.classList.add('text-gray-300', 'hover:text-brand', 'hover:border-brand');
+        }
+
+        // 4. Quiz link (chapter-01 -> quiz-01)
+        const num = CHAPTER_ID.replace('chapter-', '');
+        document.getElementById('quiz-btn').href = 'dashboard.html?quiz=quiz-' + num;
+
+        // 5. Show actions
+        document.getElementById('chapter-actions').classList.remove('hidden');
+
+      } catch (err) {
+        showError(err.message);
+      }
+    }
+
+    async function markComplete() {
+      try {
+        const res = await fetch(`${API}/progress/${USER_ID}/chapter/${CHAPTER_ID}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ completed: true, completion_percentage: 100 })
+        });
+        if (res.ok) {
+          ['btn-complete', 'btn-complete-bottom'].forEach(id => {
+            const btn = document.getElementById(id);
+            btn.textContent = '\u2713 Completed!';
+            btn.classList.add('bg-brand', 'text-gray-950', 'border-brand');
+            btn.classList.remove('bg-brand/10', 'text-brand');
+          });
+        }
+      } catch (_) {
+        alert('Could not save progress. Make sure the backend is running on localhost:8000.');
+      }
+    }
+
+    document.getElementById('btn-complete').addEventListener('click', markComplete);
+    document.getElementById('btn-complete-bottom').addEventListener('click', markComplete);
+
+    loadChapter();
+  </script>
+</body>
+</html>

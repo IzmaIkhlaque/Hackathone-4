@@ -1,0 +1,68 @@
+{
+  "quiz_id": "quiz-03",
+  "chapter_id": "chapter-03",
+  "title": "Chapter 3: MCP and Agent Skills",
+  "pass_threshold": 70,
+  "questions": [
+    {
+      "question_id": "q1",
+      "question": "What does MCP stand for?",
+      "options": {
+        "A": "Model Control Protocol",
+        "B": "Model Context Protocol",
+        "C": "Multi-Cloud Platform",
+        "D": "Machine Compute Pipeline"
+      },
+      "correct_answer": "B",
+      "explanation": "MCP stands for Model Context Protocol — an open standard that defines how AI agents discover and call external capabilities (Tools, Resources, and Prompts) in a framework-agnostic way."
+    },
+    {
+      "question_id": "q2",
+      "question": "What are the THREE universal building blocks defined by MCP?",
+      "options": {
+        "A": "Agents, Chains, Memories",
+        "B": "Models, Embeddings, Vectors",
+        "C": "Tools, Resources, Prompts",
+        "D": "Functions, Schemas, Endpoints"
+      },
+      "correct_answer": "C",
+      "explanation": "MCP defines three universal building blocks: Tools (callable functions), Resources (readable data sources), and Prompts (reusable message templates). Any MCP-compatible agent can use any MCP server's Tools, Resources, and Prompts."
+    },
+    {
+      "question_id": "q3",
+      "question": "In the Agent Factory Architecture, which layer does MCP occupy?",
+      "options": {
+        "A": "L1 — Event Bus",
+        "B": "L3 — FastAPI",
+        "C": "L4 — MCP Server",
+        "D": "L6 — Runtime Skills"
+      },
+      "correct_answer": "C",
+      "explanation": "MCP occupies Layer 4 (MCP Server) in the 8-layer Agent Factory Architecture. It sits between the Claude Agent SDK (L5) and the FastAPI backend (L3), routing agent tool calls to the appropriate backend endpoints."
+    },
+    {
+      "question_id": "q4",
+      "question": "What is the primary difference between an MCP Tool and an MCP Resource?",
+      "options": {
+        "A": "Tools are faster; Resources are slower",
+        "B": "Tools are actions the agent calls; Resources are data sources the agent reads",
+        "C": "Tools are for Claude; Resources are for GPT-4",
+        "D": "Tools require authentication; Resources are public"
+      },
+      "correct_answer": "B",
+      "explanation": "An MCP Tool is a callable action (e.g. submit_quiz, search_content). An MCP Resource is a data source the agent reads (e.g. a chapter summary at URI 'course://chapters/chapter-01/summary'). The distinction matters for how agents discover and use them."
+    },
+    {
+      "question_id": "q5",
+      "question": "What are the THREE properties of a well-designed Agent Skill?",
+      "options": {
+        "A": "Fast, Cheap, Accurate",
+        "B": "Single Responsibility, Clear Termination, API-Grounded",
+        "C": "Stateless, Idempotent, RESTful",
+        "D": "Cached, Versioned, Documented"
+      },
+      "correct_answer": "B",
+      "explanation": "A well-designed Agent Skill has: (1) Single Responsibility — does one thing only; (2) Clear Termination — has a defined endpoint so it doesn't loop; (3) API-Grounded — always fetches data from the backend API, never from the LLM's training memory."
+    }
+  ]
+}

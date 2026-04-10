@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard — Course Companion FTE</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: { extend: { colors: { brand: { DEFAULT: '#06b6d4', dark: '#0e7490', light: '#67e8f9' } } } }
+    }
+  </script>
+</head>
+<body class="bg-gray-950 text-gray-100 font-sans antialiased min-h-screen">
+
+  <!-- NAV -->
+  <nav class="fixed top-0 inset-x-0 z-50 bg-gray-950/80 backdrop-blur border-b border-gray-800">
+    <div class="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
+      <a href="index.html" class="text-brand font-bold text-lg tracking-tight">Course Companion FTE</a>
+      <div class="flex items-center gap-4">
+        <span id="nav-user-id" class="hidden sm:block text-xs text-gray-600 font-mono"></span>
+        <span id="nav-tier" class="px-2 py-0.5 rounded-full bg-brand/10 text-brand text-xs font-semibold uppercase">free</span>
+      </div>
+    </div>
+  </nav>
+
+  <main class="pt-24 pb-16 px-4 max-w-5xl mx-auto">
+
+    <!-- HEADER -->
+    <div class="mb-8">
+      <h1 class="text-2xl sm:text-3xl font-extrabold mb-1">My Dashboard</h1>
+      <p class="text-gray-400 text-sm">Track your AI Agent Development progress</p>
+    </div>
+
+    <!-- ERROR BANNER -->
+    <div id="error-banner" class="hidden mb-6 p-4 rounded-xl bg-red-900/30 border border-red-800 text-red-300 text-sm"></div>
+
+    <!-- TOP STATS -->
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
+      <div class="p-4 rounded-2xl bg-gray-900 border border-gray-800 text-center">
+        <div id="stat-completion" class="text-3xl font-extrabold text-brand">—</div>
+        <div class="text-xs text-gray-500 mt-1">Completion %</div>
+      </div>
+      <div class="p-4 rounded-2xl bg-gray-900 border border-gray-800 text-center">
+        <div id="stat-streak" class="text-3xl font-extrabold text-brand">—</div>
+        <div class="text-xs text-gray-500 mt-1">Day Streak 🔥</div>
+      </div>
+      <div class="p-4 rounded-2xl bg-gray-900 border border-gray-800 text-center">
+        <div id="stat-chapters" class="text-3xl font-extrabold text-brand">—</div>
+        <div class="text-xs text-gray-500 mt-1">Chapters Done</div>
+      </div>
+      <div class="p-4 rounded-2xl bg-gray-900 border border-gray-800 text-center">
+        <div id="stat-study-days" class="text-3xl font-extrabold text-brand">—</div>
+        <div class="text-xs text-gray-500 mt-1">Total Study Days</div>
+      </div>
+    </div>
+
+    <!-- PROGRESS BAR -->
+    <div class="mb-8 p-5 rounded-2xl bg-gray-900 border border-gray-800">
+      <div class="flex justify-between items-center mb-3">
+        <span class="font-semibold text-sm">Course Progress</span>
+        <span id="progress-label" class="text-brand text-sm font-bold">0%</span>
+      </div>
+      <div class="h-3 rounded-full bg-gray-800 overflow-hidden">
+        <div id="progress-bar" class="h-full rounded-full bg-gradient-to-r from-brand to-brand-light transition-all duration-700" style="width:0%"></div>
+      </div>
+    </div>
+
+    <!-- MAIN GRID -->
+    <div class="grid lg:grid-cols-5 gap-6">
+
+      <!-- CHAPTER LIST -->
+      <div class="lg:col-span-3">
+        <h2 class="font-bold text-lg mb-4">Course Chapters</h2>
+        <div id="chapter-list" class="space-y-3">
+          <!-- Loading skeleton -->
+          <div class="animate-pulse space-y-3">
+            <div class="h-16 rounded-xl bg-gray-800"></div>
+            <div class="h-16 rounded-xl bg-gray-800"></div>
+            <div class="h-16 rounded-xl bg-gray-800"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SIDEBAR -->
+      <div class="lg:col-span-2 space-y-6">
+
+        <!-- STREAK CARD -->
+        <div class="p-5 rounded-2xl bg-gray-900 border border-gray-800">
+          <h2 class="font-bold text-sm text-gray-400 uppercase tracking-widest mb-4">Streak</h2>
+          <div class="flex items-end gap-3">
+            <div>
+              <div id="streak-current" class="text-5xl font-extrabold text-brand">0</div>
+              <div class="text-gray-400 text-sm">current streak</div>
+            </div>
+            <div class="pb-1 text-gray-600">|</div>
+            <div>
+              <div id="streak-longest" class="text-2xl font-bold text-gray-300">0</div>
+              <div class="text-gray-500 text-xs">longest ever</div>
+            </div>
+          </div>
+          <p id="streak-last" class="text-xs text-gray-600 mt-3"></p>
+        </div>
+
+        <!-- QUIZ SCORES -->
+        <div class="p-5 rounded-2xl bg-gray-900 border border-gray-800">
+          <h2 class="font-bold text-sm text-gray-400 uppercase tracking-widest mb-4">Quiz Scores</h2>
+          <div id="quiz-scores">
+            <p class="text-gray-600 text-sm italic">No quiz attempts yet.</p>
+          </div>
+        </div>
+
+        <!-- QUICK ACTIONS -->
+        <div class="p-5 rounded-2xl bg-gray-900 border border-gray-800">
+          <h2 class="font-bold text-sm text-gray-400 uppercase tracking-widest mb-4">Quick Actions</h2>
+          <div class="space-y-2">
+            <a href="learn.html?chapter=chapter-01"
+               class="flex items-center gap-3 p-3 rounded-xl bg-gray-800 hover:bg-brand/10 hover:border-brand/30 border border-transparent transition-colors text-sm">
+              <span class="text-brand">▶</span> Continue Chapter 1
+            </a>
+            <a href="learn.html"
+               class="flex items-center gap-3 p-3 rounded-xl bg-gray-800 hover:bg-brand/10 hover:border-brand/30 border border-transparent transition-colors text-sm">
+              <span class="text-brand">📖</span> Browse All Chapters
+            </a>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </main>
+
+  <script>
+    const API_BASE = 'http://localhost:8000/api/v1';
+
+    // ── User ID management ─────────────────────────────────────────────────
+    function getOrCreateUserId() {
+      let uid = localStorage.getItem('cc_user_id');
+      if (!uid) {
+        uid = 'web_' + crypto.randomUUID();
+        localStorage.setItem('cc_user_id', uid);
+      }
+      return uid;
+    }
+
+    const USER_ID = getOrCreateUserId();
+    document.getElementById('nav-user-id').textContent = USER_ID.slice(0, 20) + '…';
+
+    // ── API helpers ────────────────────────────────────────────────────────
+    async function apiFetch(path) {
+      const res = await fetch(API_BASE + path);
+      if (!res.ok) throw new Error(`API ${path} → ${res.status}`);
+      return res.json();
+    }
+
+    function showError(msg) {
+      const el = document.getElementById('error-banner');
+      el.textContent = 'Backend not reachable: ' + msg + ' — Make sure the server is running on localhost:8000';
+      el.classList.remove('hidden');
+    }
+
+    // ── Render chapters ────────────────────────────────────────────────────
+    function renderChapters(chapters, completedSet, userTier) {
+      const tierRank = { free: 0, premium: 1, pro: 2, team: 3 };
+      const userRank = tierRank[userTier] ?? 0;
+      const list = document.getElementById('chapter-list');
+      list.innerHTML = '';
+
+      chapters.forEach(ch => {
+        const done = completedSet.has(ch.chapter_id);
+        const locked = (tierRank[ch.tier_required] ?? 0) > userRank;
+        const tierBadge = ch.tier_required !== 'free'
+          ? `<span class="text-xs px-2 py-0.5 rounded-full ${locked ? 'bg-yellow-900/40 text-yellow-400' : 'bg-brand/10 text-brand'} uppercase font-semibold">${ch.tier_required}</span>`
+          : '';
+
+        list.innerHTML += `
+          <div class="flex items-center gap-4 p-4 rounded-xl bg-gray-900 border ${done ? 'border-brand/40' : 'border-gray-800'} hover:border-brand/30 transition-colors">
+            <div class="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 text-sm font-bold
+              ${done ? 'bg-brand text-gray-950' : locked ? 'bg-gray-800 text-gray-500' : 'bg-gray-800 text-gray-300'}">
+              ${done ? '✓' : locked ? '🔒' : ch.order_index}
+            </div>
+            <div class="flex-1 min-w-0">
+              <div class="flex items-center gap-2 flex-wrap">
+                <span class="font-semibold text-sm ${locked ? 'text-gray-500' : ''} truncate">${ch.title}</span>
+                ${tierBadge}
+              </div>
+              <span class="text-xs text-gray-600">${ch.estimated_minutes ?? '?'} min · ${ch.tier_required}</span>
+            </div>
+            ${locked
+              ? `<span class="text-xs text-yellow-600 whitespace-nowrap">Upgrade</span>`
+              : `<a href="learn.html?chapter=${ch.chapter_id}" class="text-xs text-brand hover:underline whitespace-nowrap">${done ? 'Review' : 'Read →'}</a>`
+            }
+          </div>`;
+      });
+    }
+
+    // ── Render quiz scores ─────────────────────────────────────────────────
+    function renderQuizScores(scores) {
+      const el = document.getElementById('quiz-scores');
+      if (!scores || scores.length === 0) return;
+      el.innerHTML = scores.map(s => `
+        <div class="flex items-center justify-between py-2 border-b border-gray-800 last:border-0">
+          <span class="text-sm text-gray-300">${s.quiz_id}</span>
+          <div class="flex items-center gap-2">
+            <span class="text-sm font-bold ${s.score >= 70 ? 'text-brand' : 'text-red-400'}">${s.score}%</span>
+            <span class="text-xs px-1.5 py-0.5 rounded-full ${s.passed ? 'bg-green-900/40 text-green-400' : 'bg-red-900/40 text-red-400'}">
+              ${s.passed ? 'PASS' : 'FAIL'}
+            </span>
+          </div>
+        </div>`).join('');
+    }
+
+    // ── Register user on load ──────────────────────────────────────────────
+    async function registerUser() {
+      try {
+        const res = await fetch(API_BASE + '/access/users', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ user_id: USER_ID })
+        });
+        if (res.ok) {
+          const user = await res.json();
+          document.getElementById('nav-tier').textContent = user.tier;
+          return user.tier;
+        }
+      } catch (_) {}
+      return 'free';
+    }
+
+    // ── Main load ──────────────────────────────────────────────────────────
+    async function loadDashboard() {
+      const userTier = await registerUser();
+
+      try {
+        const [chaptersData, progressData] = await Promise.all([
+          apiFetch('/content/chapters'),
+          apiFetch('/progress/' + USER_ID)
+        ]);
+
+        const completed = new Set(progressData.completed_chapters || []);
+
+        // Stats
+        document.getElementById('stat-completion').textContent = (progressData.completion_percentage ?? 0) + '%';
+        document.getElementById('stat-streak').textContent = progressData.current_streak ?? 0;
+        document.getElementById('stat-chapters').textContent = (progressData.completed_chapters?.length ?? 0) + '/6';
+        document.getElementById('stat-study-days').textContent = progressData.total_study_days ?? 0;
+
+        // Progress bar
+        const pct = progressData.completion_percentage ?? 0;
+        document.getElementById('progress-bar').style.width = pct + '%';
+        document.getElementById('progress-label').textContent = pct + '%';
+
+        // Streak
+        document.getElementById('streak-current').textContent = progressData.current_streak ?? 0;
+        document.getElementById('streak-longest').textContent = progressData.longest_streak ?? 0;
+        if (progressData.current_streak > 0) {
+          document.getElementById('streak-last').textContent = 'Keep it up! Study today to maintain your streak.';
+        }
+
+        // Chapters
+        renderChapters(chaptersData.chapters || [], completed, userTier);
+
+        // Quiz scores
+        renderQuizScores(progressData.quiz_scores || []);
+
+      } catch (err) {
+        showError(err.message);
+        // Show chapter list with placeholder data when API is offline
+        document.getElementById('chapter-list').innerHTML =
+          '<p class="text-gray-600 text-sm p-4 rounded-xl bg-gray-900 border border-gray-800">Connect to backend to see chapter list.</p>';
+      }
+    }
+
+    loadDashboard();
+  </script>
+</body>
+</html>
