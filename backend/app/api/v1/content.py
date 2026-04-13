@@ -151,7 +151,7 @@ async def get_chapter(
             },
         )
 
-    content = await r2_get_chapter(chapter_id)
+    content = r2_get_chapter(chapter_id)
     if content is None:
         raise HTTPException(
             status_code=503,
