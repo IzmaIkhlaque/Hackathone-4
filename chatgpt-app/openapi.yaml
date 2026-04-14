@@ -8,7 +8,7 @@ info:
   version: "1.0"
 
 servers:
-  - url: https://your-backend.railway.app
+  - url: https://hackathone-4-production.up.railway.app/
     description: Production server (update after Railway deployment)
 
 # ─────────────────────────────────────────────────────────────────────────────
