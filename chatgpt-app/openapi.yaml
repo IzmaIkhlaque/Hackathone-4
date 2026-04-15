@@ -8,7 +8,11 @@ info:
   version: "1.0"
 
 servers:
+<<<<<<< HEAD
   - url: https://hackathone-4-production.up.railway.app/
+=======
+  - url: https://hackathone-4-production.up.railway.app/api/v1
+>>>>>>> eedea82 (Backend URL Integrated)
     description: Production server (update after Railway deployment)
 
 # ─────────────────────────────────────────────────────────────────────────────

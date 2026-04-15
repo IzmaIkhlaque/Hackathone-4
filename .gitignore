@@ -38,3 +38,10 @@ out/
 # Logs
 *.log
 *.pid
+
+
+
+
+urls_phase1.txt
+PHASE_1_PROMPT.md
+PHASE_1_BATCHES.md
